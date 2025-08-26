@@ -1,21 +1,17 @@
 import React from "react";
 import useGlobalReducer from "../hooks/useGlobalReducer";
 import { Link } from "react-router-dom";
+import { deleteContact } from "../contactActions.jsx";
 
 export const ContactList = () => {
     const { store, dispatch } = useGlobalReducer();
 
-    const handleDelete = (contactId) => {
-        fetch(`https://playground.4geeks.com/contact/agendas/gaboasecas/contacts/${contactId}`, {
-            method: "DELETE"
-        })
-        .then(response => {
-            if (!response.ok) throw new Error("No se pudo eliminar el contacto");
-        })
-        .then(() => {
-            dispatch({ type: "DELETE_CONTACT", payload: contactId });
-        })
-        .catch(error => console.error("Error al eliminar contacto:", error));
+    const handleDelete = async (contactId) => {
+        try {
+            await deleteContact(dispatch, contactId);
+        } catch (error) {
+            console.error("Error al eliminar contacto:", error);
+        }
     };
 
     return (

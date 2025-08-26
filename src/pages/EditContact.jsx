@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import useGlobalReducer from "../hooks/useGlobalReducer";
+import { updateContact, getContacts } from "../contactActions.jsx";
 
 export const EditContact = () => {
     const { store, dispatch } = useGlobalReducer();
@@ -16,7 +17,7 @@ export const EditContact = () => {
     const [address, setAddress] = useState(contact.address);
     const [phone, setPhone] = useState(contact.phone);
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
         const updatedContact = {
@@ -26,26 +27,13 @@ export const EditContact = () => {
             phone: phone
         };
 
-        fetch(`https://playground.4geeks.com/contact/agendas/gaboasecas/contacts/${contactId}`, {
-            method: "PUT",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(updatedContact)
-        })
-            .then(response => {
-                if (!response.ok) throw new Error("No se pudo actualizar el contacto");
-                return response.json();
-            })
-            .then(() => {
-                fetch("https://playground.4geeks.com/contact/agendas/gaboasecas/contacts")
-                    .then(response => response.json())
-                    .then(data => {
-                        dispatch({ type: "SET_CONTACTS", payload: data.contacts });
-                        navigate("/");
-                    });
-            })
-            .catch(error => console.error("Error al actualizar:", error));
+        try {
+            await updateContact(dispatch, contactId, updatedContact);
+            await getContacts(dispatch);
+            navigate("/");
+        } catch (error) {
+            console.error("Error al actualizar:", error);
+        }
     };
 
     return (

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import useGlobalReducer from "../hooks/useGlobalReducer";
+import { createContact } from "../contactActions.jsx";
 
 export const AddContact = () => {
     const { dispatch } = useGlobalReducer();
@@ -11,7 +12,7 @@ export const AddContact = () => {
     const [address, setAddress] = useState("");
     const [phone, setPhone] = useState("");
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         console.log("Datos a enviar:", { fullName, email, address, phone });
 
@@ -22,21 +23,13 @@ export const AddContact = () => {
             phone: phone
         };
 
-        fetch("https://playground.4geeks.com/contact/agendas/gaboasecas/contacts", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(newContact)
-        })
-        .then(response => {
-            if (!response.ok) throw new Error("No se pudo guardar el contacto");
-            return response.json();
-        })
-        .then(data => {
-            dispatch({ type: "ADD_CONTACT", payload: data });
+        try {
+            const data = await createContact(dispatch, newContact);
             console.log("Contacto creado:", data);
             navigate("/");
-        })
-        .catch(error => console.error("Error al crear contacto:", error));
+        } catch (error) {
+            console.error("Error al crear contacto:", error);
+        }
     };
 
     return (
